@@ -1,8 +1,7 @@
 from fastapi import HTTPException, Depends, FastAPI
-
 from app.auth import verify_admin
 from app.models import NewTask, OldTask
-from handlers.swagger import add_new_tasks, check_task,put_tasks
+from handlers.swagger import add_new_tasks, check_task,put_tasks,delete_tasks
 
 app = FastAPI()
 
@@ -17,3 +16,7 @@ def check_new_task(admin: str = Depends(verify_admin)):
 @app.put("/expense/{id}")
 def put_task(id: int, item: NewTask):
     return put_tasks(id,item)
+
+@app.delete("/delete_task")
+def delete_this_task(id: int):
+    return delete_tasks(id)

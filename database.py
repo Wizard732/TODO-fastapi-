@@ -1,4 +1,6 @@
 import json
+from json import JSONDecodeError
+
 from app.models import NewTask, OldTask
 from fastapi import HTTPException
 
@@ -65,9 +67,29 @@ def put_tasks(id: int, item: NewTask):
             found = True
             break
 
-        if not found:
-            raise HTTPException(status_code=404, detail="Запись не найдена")
-            # Сохраняем ВЕСЬ обновленный список
+    if not found:
+        raise HTTPException(status_code=404, detail="Запись не найдена")
+        # Сохраняем ВЕСЬ обновленный список
     save_expenses(data)
     return data[updated_index]
+
+def delete_tasks(id: int):
+    data = read_expenses()
+    filename = "main.json"
+    new_list = []
+
+    for task in data: # перебираем json файл если там есть задача не с айди который ввели перекидываем данные в новый файл
+        if task["id"] != id:
+            new_list.append(task)
+
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(new_list,f) # вписываем данные с нового файла
+
+    return  {"message":f"Задача{id} успешно удалена"}
+
+
+
+
+
+
 
