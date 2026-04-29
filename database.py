@@ -73,7 +73,7 @@ def put_tasks(id: int, item: NewTask):
     save_expenses(data)
     return data[updated_index]
 
-def delete_tasks(id: int):
+def delete_tasks(id: int,admin: str):
     data = read_expenses()
     filename = "main.json"
     new_list = []
