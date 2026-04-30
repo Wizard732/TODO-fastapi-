@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 class OldTask(BaseModel):
     id: int = Field(gt=0)
@@ -9,6 +10,7 @@ class OldTask(BaseModel):
 
 
 class NewTask(BaseModel):
+    id: Optional[int] = None
     status: bool = Field(default=True)
     title: str = Field(min_length=2, max_length=10)
     description: str = Field(default=None)

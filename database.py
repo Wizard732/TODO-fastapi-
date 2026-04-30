@@ -1,57 +1,56 @@
 import json
 from json import JSONDecodeError
-
+import pymysql
+from mySql import get_connection
 from app.models import NewTask, OldTask
 from fastapi import HTTPException
 
 
 def add_new_tasks(task: NewTask):
-    filename = "main.json"
-
+    connection = get_connection()
+    if not connection:
+        return {"error":"Не удалось подключится к БД"}
     try:
-        with open(filename, 'r', encoding="utf-8") as f:
-            data = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        data = []
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO tasks (priority, title, description, status) VALUES (%s, %s, %s, %s)" # Делаем запрос в БД
+            values = (task.priority, task.title, task.description, task.status) # Аргументы для Бд
 
-    if not data:
-        new_id = 1 # если в json еще не было данных с id 1 создаем id 1
-    else:
-        new_id = data[-1]["id"] +1 # если данные были берем последнее айди и прибавляем +1
-    new_expense = task.model_dump()
-    new_expense["id"] = new_id # передаем данные с new id в new expense
-    data.append(new_expense) # добавляем в data данные с new expense
+            cursor.execute(sql,values) # выводим данные
+            connection.commit()
 
-    try:
-        with open(filename, 'w', encoding="utf-8") as f:
-            json.dump(data, f)
-    except OSError:
-        return {'error': "Не удалось записать данные в файл"}
+            return {"message": "Данные успешно записаны в БД"}
+    except Exception as e:
+        return {"error": f"Ошибка при добавлении {e}"}
+    finally:
+        connection.close() # Закрываем Бд
+
 
 def check_tasks(admin: str):
-    filename = "main.json"
 
-    try:
-        with open(filename, 'r', encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        return {"message": "Не удалось открыть файл"}
-    return data
+
 
 
 def read_expenses():
-    filename = "main.json"
+
+
+
+def save_expenses(values):
+    connection = get_connection()
+    if not connection:
+        return {"error":"Не удалось подключится к БД"}
     try:
-        with open(filename, 'r', encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO tasks (priority, title, description, status) VALUES (%s, %s, %s, %s)" # Делаем запрос в БД
+            value = (values) # Аргументы для Бд
 
+            cursor.execute(sql,value) # выводим данные
+            connection.commit()
 
-def save_expenses(data):
-    filename = "main.json"
-    with open(filename, 'w', encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+            return {"message": "Данные успешно записаны в БД"}
+    except Exception as e:
+        return {"error": f"Ошибка при добавлении {e}"}
+    finally:
+        connection.close() # Закрываем Бд
 
 
 def put_tasks(id: int, item: NewTask):
