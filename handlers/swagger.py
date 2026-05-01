@@ -1,6 +1,7 @@
 from fastapi import HTTPException, Depends
 from app.models import NewTask, OldTask
-from database import add_new_tasks, check_tasks,put_tasks, delete_tasks
+from database import add_new_tasks, put_tasks, delete_tasks
+from mySql import tasks_sql
 
 def add_new_task(id: int, item: NewTask):
     if item.priority == 1:
@@ -8,11 +9,11 @@ def add_new_task(id: int, item: NewTask):
     return add_new_tasks(id, item)
 
 def check_task(admin: str):
-    check_tasks(admin)
+    tasks_sql(admin)
 
 def put_new_task(id: int, item: NewTask):
     put_tasks(id,item)
 
 def delete_task(id: int):
-    return (id, item)
+    pass
 

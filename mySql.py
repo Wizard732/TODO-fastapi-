@@ -14,7 +14,7 @@ def get_connection():
         print(f"Connect error: {ex}")
         return None
 
-def tasks_sql():
+def tasks_sql(admin:str):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:

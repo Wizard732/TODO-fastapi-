@@ -25,23 +25,34 @@ def add_new_tasks(task: NewTask):
         connection.close() # Закрываем Бд
 
 
-def check_tasks(admin: str):
-
-
-
-
 def read_expenses():
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM tasks") # делаем запрос в таблицу tasks в базе
+            rows = cursor.fetchall() # возвращаем список кортежей
+
+            tasks = []
+            for row in rows: # добавляем в список данные из дб
+                tasks.append({
+                    "id": row[0],
+                    "title": row[1],
+                    "description": row[2],
+                    "status": row[3]
+                })
+            return tasks # возвращаем список
+    finally:
+        connection.close()
 
 
-
-def save_expenses(values):
+def save_expenses(task: NewTask):
     connection = get_connection()
     if not connection:
         return {"error":"Не удалось подключится к БД"}
     try:
         with connection.cursor() as cursor:
             sql = "INSERT INTO tasks (priority, title, description, status) VALUES (%s, %s, %s, %s)" # Делаем запрос в БД
-            value = (values) # Аргументы для Бд
+            value = (task.priority, task.title, task.description, task.status) # Аргументы для Бд
 
             cursor.execute(sql,value) # выводим данные
             connection.commit()
@@ -72,19 +83,25 @@ def put_tasks(id: int, item: NewTask):
     save_expenses(data)
     return data[updated_index]
 
-def delete_tasks(id: int,admin: str):
-    data = read_expenses()
-    filename = "main.json"
-    new_list = []
+def delete_tasks(id: int, admin: str):
+    connection = get_connection()
+    if not connection:
+        return {"error": "Не удалось подключится к БД"}
+    try:
+        with connection.cursor() as cursor:
+            sql = "DELETE FROM tasks WHERE id = %s"  # Делаем запрос в БД
+            cursor.execute(sql, (id,))  # выводим данные
+            connection.commit()
 
-    for task in data: # перебираем json файл если там есть задача не с айди который ввели перекидываем данные в новый файл
-        if task["id"] != id:
-            new_list.append(task)
+            if cursor.rowcount == 0: # если равно 0 значит в базе нету записей удалять нечего
+                return {"message":"Задача с таким id не найдена"}
+            return {"message":f"Задача с id {id} удалена"}
 
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(new_list,f) # вписываем данные с нового файла
+    except Exception as e:
+        return {"error": f"Ошибка при добавлении {e}"}
+    finally:
+        connection.close()  # Закрываем Бд
 
-    return  {"message":f"Задача{id} успешно удалена"}
 
 
 
