@@ -1,10 +1,8 @@
 from fastapi import HTTPException, Depends, FastAPI
 from app.auth import verify_admin
-from app.models import NewTask, OldTask
-from handlers.swagger import add_new_tasks, put_tasks,delete_tasks
-import pymysql
-from config import HOST,PASSWORD,DATABASE,USER
-from mySql import get_connection, tasks_sql
+from app.models import NewTask
+from handlers.swagger import add_new_tasks, put_tasks,delete_tasks, tasks_sql
+from mySql import get_connection
 
 app = FastAPI()
 
